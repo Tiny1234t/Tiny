@@ -1,0 +1,43 @@
+import requests
+from flask import Flask, request
+
+# Telegram Bot API Token
+API_TOKEN = "8117149450:AAHx_Zn_i-Y0QD63JFRHWmJn3SOPNE-WBtU"
+BASE_URL = f"https://api.telegram.org/bot{API_TOKEN}"
+
+# Initialize Flask App
+app = Flask(__name__)
+
+# Function to send messages
+def send_message(chat_id, text):
+    url = f"{BASE_URL}/sendMessage"
+    payload = {'chat_id': chat_id, 'text': text}
+    requests.post(url, json=payload)
+
+# Webhook Route
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    data = request.get_json()
+    if "message" in data:
+        chat_id = data['message']['chat']['id']
+        message = data['message'].get('text', '')
+
+        # Bot Commands
+        if message == '/start':
+            send_message(chat_id, "Welcome to TinyChadBot! Use /help to see available commands.")
+        elif message == '/help':
+            send_message(chat_id, "Available commands:\n/start - Start the bot\n/help - Get help\n/connect_wallet - Connect your Phantom wallet\n/track - Track new opportunities\n/goal_progress - Check progress toward your $1M goal")
+        elif message == '/connect_wallet':
+            send_message(chat_id, "Phantom wallet connection coming soon!")
+        elif message == '/track':
+            send_message(chat_id, "Tracking new opportunities...")
+        elif message == '/goal_progress':
+            send_message(chat_id, "Progress tracking feature is in development.")
+        else:
+            send_message(chat_id, "Sorry, I didn't understand that command. Use /help to see available commands.")
+
+    return "OK", 200
+
+# Run the Flask App
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
